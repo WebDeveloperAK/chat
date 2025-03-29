@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Chat</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Socket.io -->
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+    <style>
+        body {
+            background: #f8f9fa;
+        }
+        #chat-container {
+            max-width: 500px;
+            margin: 50px auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            height: 500px;
+            overflow: hidden;
+        }
+        #messages {
+            list-style: none;
+            padding: 15px;
+            margin: 0;
+            height: 400px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        #messages li {
+            padding: 10px;
+            border-radius: 15px;
+            max-width: 70%;
+            word-wrap: break-word;
+            margin-bottom: 10px;
+        }
+        .my-message {
+            background: #007bff;
+            color: white;
+            align-self: flex-end;
+        }
+        .other-message {
+            background: #e9ecef;
+            align-self: flex-start;
+        }
+        #input-container {
+            display: flex;
+            padding: 10px;
+            background: white;
+            border-top: 1px solid #ccc;
+        }
+        #message {
+            flex-grow: 1;
+            padding: 10px;
+            border-radius: 20px;
+            border: 1px solid #ced4da;
+            outline: none;
+        }
+        button {
+            margin-left: 10px;
+            border-radius: 20px;
+            padding: 10px 20px;
+        }
+        #name-container {
+            max-width: 400px;
+            margin: 100px auto;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Name Input Section -->
+    <div id="name-container" class="container">
+        <h2>Enter Your Name</h2>
+        <input id="username" class="form-control my-3" type="text" placeholder="Your Name..." required>
+        <button class="btn btn-primary" onclick="startChat()">Start Chat</button>
+    </div>
+
+    <!-- Chat Container (Hidden Initially) -->
+    <div id="chat-container" class="container d-none">
+        <ul id="messages"></ul>
+        <div id="input-container">
+            <input id="message" class="form-control" type="text" placeholder="Type a message..." autocomplete="off">
+            <button class="btn btn-primary" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS (optional) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        let username = "";
+
+        const socket = io("http://localhost:3000");
+
+        function startChat() {
+            const nameInput = document.getElementById("username").value.trim();
+            if (nameInput) {
+                username = nameInput;
+                document.getElementById("name-container").classList.add("d-none");
+                document.getElementById("chat-container").classList.remove("d-none");
+            } else {
+                alert("Please enter your name!");
+            }
+        }
+
+        socket.on("chat message", (msg) => {
+            const li = document.createElement("li");
+            li.textContent = msg;
+
+            // Differentiate message styles
+            li.classList.add(msg.startsWith(username) ? "my-message" : "other-message");
+
+            document.getElementById("messages").appendChild(li);
+            document.getElementById("messages").scrollTop = document.getElementById("messages").scrollHeight;
+        });
+
+        function sendMessage() {
+            const messageInput = document.getElementById("message");
+            const message = messageInput.value.trim();
+            if (message) {
+                socket.emit("chat message", `${username}: ${message}`);
+                messageInput.value = "";
+            }
+        }
+    </script>
+
+</body>
+</html>
