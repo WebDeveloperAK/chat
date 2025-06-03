@@ -177,6 +177,10 @@ Enterprise Web Development | Custom Web &amp; App Development ! ERP &amp; CRM So
 
             document.getElementById("messages").appendChild(li);
             document.getElementById("messages").scrollTop = document.getElementById("messages").scrollHeight;
+            // ✅ Send notification to Flutter WebView
+    if (window.flutter_inappwebview && !msg.startsWith(username)) {
+        window.flutter_inappwebview.callHandler('newMessageNotification', msg);
+    }
         });
 
         function sendMessage() {
